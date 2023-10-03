@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authentication\LoginController;
 use App\Http\Controllers\Authentication\OtpController;
 use App\Http\Controllers\Authentication\RegisterController;
 use Illuminate\Http\Request;
@@ -24,6 +25,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::controller(RegisterController::class)->group(function() {
     Route::post('/register/nasabah'  , 'register_nasabah')->name('register.nasabah');
 });
+Route::controller(LoginController::class)->group(function() {
+    Route::post('/login' , 'login')->name('login');
+});
 
 
 //AUTH ENDPOINT
@@ -37,4 +41,10 @@ Route::middleware(['auth:sanctum'])->group(function() {
         });
     });
 
+    //VERIFIED PHONE NUMBER ENDPOINT
+    Route::middleware(['is.verified'])->group(function () {
+        Route::controller(LoginController::class)->group(function() {
+            Route::post('/logout' , 'logout')->name('logout');
+        });
+    });
 });

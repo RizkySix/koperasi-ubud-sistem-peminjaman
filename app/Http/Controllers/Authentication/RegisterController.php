@@ -21,12 +21,17 @@ class RegisterController extends Controller
         $action = new RegisterNasabahAction($validatedData);
         $response = $action->handle_action();
 
-        $status = $response instanceof Exception ? 500 : 201;
-       
-        return response()->json([
-            'status' => $status == 201 ? true : false,
-            'data' => $status == 201 ? UserResource::make($response) : $response->getMessage(),
-        ], $status);        
+        if($response instanceof Exception){
+            return response()->json([
+                'status' => false,
+                'error' => $response->getMessage(),
+            ], 500);  
+        }else{
+            return response()->json([
+                'status' => true,
+                'data' => UserResource::make($response),
+            ], 201);  
+        }      
         
     }
 

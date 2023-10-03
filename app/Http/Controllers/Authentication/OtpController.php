@@ -45,12 +45,18 @@ class OtpController extends Controller
         $action = new OtpSendAction($validatedData['otp_code']);
         $response = $action->handle_action();
 
-        $status = $response instanceof Exception ? 500 : null;
         $status = $response == true ? 200 : 422;
 
-        return response()->json([
-            'status' => $status == 200 ? true : false,
-            'data' => $status == 500 ? $response->getMessage() : $response
-        ] , $status);
+        if($response instanceof Exception){
+            return response()->json([
+                'status' => false,
+                'error' => $response->getMessage()
+            ] , 500);
+        }else{
+            return response()->json([
+                'status' => $response,
+                'data' => $status == 200 ? 'Verifikasi akun berhasil' : 'Kode otp tidak sesuai'
+            ] , $status);
+        }
     }
 }

@@ -16,7 +16,7 @@ use Tests\TestCase;
 class OtpTest extends TestCase
 {
     use RefreshDatabase, FeatureTestTrait;
-    private $user , $secUser;
+    private $user , $secUser , $thirdUser;
 
     protected function setUp(): void
     {
@@ -29,6 +29,7 @@ class OtpTest extends TestCase
         $this->secUser = User::factory()->create([
             'phone_number_verified' => null
         ]);
+        $this->thirdUser = User::factory()->create();
     }
 
     /**
@@ -136,6 +137,24 @@ class OtpTest extends TestCase
         //pastikan table otp codes sudah kosong
         $this->assertDatabaseEmpty('otp_codes');
         $this->assertDatabaseMissing('otp_codes' , (array)$getOtp);
+
+    }
+
+
+    /**
+     * @group authentication-test
+     */
+    public function test_verified_user_cant_access_resend_and_send_otp_endpoint() : void
+    {
+        //hit endpoint resend otp
+        $response = $this->actingAs($this->thirdUser)->postJson(RouteServiceProvider::DOMAIN . '/otp/resend');
+        $response->assertStatus(403);
+
+        //hit endpoint send otp
+        $response = $this->actingAs($this->thirdUser)->postJson(RouteServiceProvider::DOMAIN . '/otp/send' , [
+            'otp_code' => '087123444444'
+        ]);
+        $response->assertStatus(403);
 
     }
 

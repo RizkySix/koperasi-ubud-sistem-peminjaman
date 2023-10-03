@@ -19,7 +19,7 @@ class UserFactory extends Factory
     {
         return [
             'full_name' => fake()->name(),
-            'phone_number' => mt_rand(8123123123 , 8999999999),
+            'phone_number' => '0' . mt_rand(8123123123 , 8999999999) .'',
             'phone_number_verified' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'address' => fake()->address(),
