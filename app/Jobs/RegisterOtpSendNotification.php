@@ -9,9 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 
-class RegisterOtpCodeJob implements ShouldQueue
+class RegisterOtpSendNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use WhatsAppNotificationTrait;
@@ -19,16 +18,17 @@ class RegisterOtpCodeJob implements ShouldQueue
     public $tries = 3;
     public $backoff = 5;
 
-    private $userId, $phoneNumber , $fullName;
+    private $userId, $phoneNumber , $fullName , $otpCode;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(int $userID , string $phoneNumber , string $fullName)
+    public function __construct(int $userID , string $phoneNumber , string $fullName , string $otpCode)
     {
         $this->userId = $userID;
         $this->phoneNumber = $phoneNumber;
         $this->fullName = $fullName;
+        $this->otpCode = $otpCode;
     }
 
     /**
@@ -36,16 +36,9 @@ class RegisterOtpCodeJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $otpCode = mt_rand(123145, 999999);
-        $payload = [
-            'user_id' => $this->userId,
-            'otp_code' => $otpCode,
-            'expired_time' => now()->addHour(1)
-        ];
-
         $message = "Halo *" . $this->fullName . "*,\n\n" .
                 "Terima kasih telah mendaftar di *Koperasi Ubud*. Berikut adalah kode OTP Anda untuk menyelesaikan proses registrasi:\n\n" .
-                "Kode OTP: *" . $otpCode . "*\n\n" .
+                "Kode OTP: *" . $this->otpCode . "*\n\n" .
                 "Kode akan kedaluarsa dalam 1 jam kedepan.\n\n" .
                 "Mohon jangan berikan kode ini kepada siapapun demi keamanan akun Anda.\n\n" .
                 "Terima kasih telah memilih *Koperasi Ubud*!\n\n" .
@@ -55,6 +48,5 @@ class RegisterOtpCodeJob implements ShouldQueue
         //panggil WA notification trait
         $this->notification($this->phoneNumber , $message);
 
-        DB::table('otp_codes')->insert($payload);
     }
 }

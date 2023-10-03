@@ -2,11 +2,15 @@
 
 namespace App\Action\Authentication;
 
-use App\Jobs\RegisterOtpCodeJob;
+use App\Jobs\RegisterOtpSendNotification;
 use App\Models\User;
+use App\Trait\UserCustomTrait;
+use Exception;
 
 class RegisterNasabahAction
 {
+    use UserCustomTrait;
+
     private $request = [];
 
     public function __construct(array $request)
@@ -17,17 +21,24 @@ class RegisterNasabahAction
     /**
      * Handle Action
      */
-    public function handle_action()
+    public function handle_action() : User|Exception
     {
-       $user = User::create($this->request);
-        
-       //buat token
-       $token = $user->createToken('koperasi-ubud' , ['nasabah'])->plainTextToken;
-       $user['token'] = $token;
-    
-       //panggil otp job
-       RegisterOtpCodeJob::dispatch($user->id , $user->phone_number , $user->full_name);
+       try {
+            $user = User::create($this->request);
+            
+            //buat token
+            $token = $user->createToken('koperasi-ubud' , ['nasabah'])->plainTextToken;
+            $user['token'] = $token;
+            
+            //buat otp code
+            $otpCode = $this->generate_otp($user->id);
 
-       return $user;
+            //panggil otp job
+            RegisterOtpSendNotification::dispatch($user->id , $user->phone_number , $user->full_name , $otpCode);
+
+            return $user;
+       } catch (Exception $e) {
+            return $e;
+       }
     }
 }

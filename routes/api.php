@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authentication\OtpController;
 use App\Http\Controllers\Authentication\RegisterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,4 +20,21 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/register/nasabah'  , [RegisterController::class , 'register_nasabah'])->name('register.nasabah');
+//GUEST ENDPOINT
+Route::controller(RegisterController::class)->group(function() {
+    Route::post('/register/nasabah'  , 'register_nasabah')->name('register.nasabah');
+});
+
+
+//AUTH ENDPOINT
+Route::middleware(['auth:sanctum'])->group(function() {
+    
+    //UN VERIFIED PHONE NUMBER ENDPOINT
+    Route::middleware(['un.verified'])->group(function() {
+        Route::controller(OtpController::class)->group(function() {
+            Route::post('/otp/resend' , 'resend_otp')->middleware('throttle:resend.otp')->name('resend.otp');
+            Route::post('/otp/send' , 'send_otp')->name('send.otp');
+        });
+    });
+
+});
