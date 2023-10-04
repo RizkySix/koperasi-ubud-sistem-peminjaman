@@ -18,14 +18,13 @@ class RegisterOtpSendNotification implements ShouldQueue
     public $tries = 3;
     public $backoff = 5;
 
-    private $userId, $phoneNumber , $fullName , $otpCode;
+    private $phoneNumber , $fullName , $otpCode;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(int $userID , string $phoneNumber , string $fullName , string $otpCode)
+    public function __construct(string $phoneNumber , string $fullName , string $otpCode)
     {
-        $this->userId = $userID;
         $this->phoneNumber = $phoneNumber;
         $this->fullName = $fullName;
         $this->otpCode = $otpCode;

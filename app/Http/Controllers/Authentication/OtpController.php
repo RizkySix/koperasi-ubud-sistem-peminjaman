@@ -23,10 +23,10 @@ class OtpController extends Controller
         $user = auth()->user();
 
         //generate otp baru
-        $newOtp = $this->generate_otp($user->id);
+        $newOtp = $this->generate_otp($user->phone_number);
         
         //panggil notifikasi send otp job
-        RegisterOtpSendNotification::dispatch($user->id, $user->phone_number, $user->full_name , $newOtp);
+        RegisterOtpSendNotification::dispatch($user->phone_number, $user->full_name , $newOtp);
 
         return response()->json([
             'status' => true,

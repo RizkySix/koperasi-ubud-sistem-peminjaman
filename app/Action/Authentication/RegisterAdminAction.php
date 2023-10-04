@@ -3,11 +3,11 @@
 namespace App\Action\Authentication;
 
 use App\Jobs\RegisterOtpSendNotification;
-use App\Models\User;
+use App\Models\Admin;
 use App\Trait\UserCustomTrait;
 use Exception;
 
-class RegisterNasabahAction
+class RegisterAdminAction
 {
     use UserCustomTrait;
 
@@ -21,15 +21,15 @@ class RegisterNasabahAction
     /**
      * Handle Action
      */
-    public function handle_action() : User|Exception
+    public function handle_action() : Admin|Exception
     {
        try {
-            $user = User::create($this->request);
+            $user = Admin::create($this->request);
             
             //buat token
-            $token = $user->createToken('koperasi-ubud' , ['nasabah'])->plainTextToken;
+            $token = $user->createToken('koperasi-ubud' , ['admin'])->plainTextToken;
             $user['token'] = $token;
-            $user['role'] = 'Nasabah';
+            $user['role'] = 'Admin';
             
             //buat otp code
             $otpCode = $this->generate_otp($user->phone_number);

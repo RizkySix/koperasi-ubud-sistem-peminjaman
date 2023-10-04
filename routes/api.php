@@ -24,6 +24,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 //GUEST ENDPOINT
 Route::controller(RegisterController::class)->group(function() {
     Route::post('/register/nasabah'  , 'register_nasabah')->name('register.nasabah');
+    Route::post('/register/admin'  , 'register_admin')->name('register.admin');
 });
 Route::controller(LoginController::class)->group(function() {
     Route::post('/login' , 'login')->name('login');
@@ -45,6 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::middleware(['is.verified'])->group(function () {
         Route::controller(LoginController::class)->group(function() {
             Route::post('/logout' , 'logout')->name('logout');
+            Route::get('/test' , 'test_data')->name('test');
         });
     });
 });

@@ -22,7 +22,7 @@ class OtpSendAction
         try {
             $user = auth()->user();
             $findOtp = DB::table('otp_codes')
-                            ->where('user_id' , $user->id)
+                            ->where('phone_number' , $user->phone_number)
                             ->where('otp_code' , $this->otpCode)
                             ->where('expired_time' , '>' , now());
 

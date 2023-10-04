@@ -21,7 +21,8 @@ class UserResource extends JsonResource
             'verified_status' => $this->phone_number_verified ? true : false,
             'address' => $this->address,
             'birth_date' => Carbon::parse($this->birth_date)->format('d M Y'),
-            'token' => $this->token
+            'token' => $this->token,
+            'role' => $this->role,
         ];
     }
 }

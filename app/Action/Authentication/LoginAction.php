@@ -22,7 +22,7 @@ class LoginAction
     {
         try {
             
-            //check crendential dulu
+            //check crendential nasabah
             if(Auth::attempt(['phone_number' => $this->data['phone_number'], 'password' => $this->data['password']])){
                 $user = auth()->user();
 
@@ -30,6 +30,20 @@ class LoginAction
                 $token = $user->createToken('koperasi-ubud' , ['nasabah'])->plainTextToken;
 
                 $user['token'] = $token;
+                $user['role'] = 'Nasabah';
+
+                return $user;
+            }
+            
+            //check credential admin
+            if(Auth::guard('admins')->attempt(['phone_number' => $this->data['phone_number'], 'password' => $this->data['password']])){
+                $user = auth('admins')->user();
+
+                //buat token baru
+                $token = $user->createToken('koperasi-ubud' , ['admin'])->plainTextToken;
+
+                $user['token'] = $token;
+                $user['role'] = 'Admin';
 
                 return $user;
             }

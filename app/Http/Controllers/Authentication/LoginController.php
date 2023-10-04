@@ -6,10 +6,13 @@ use App\Action\Authentication\LoginAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Authentication\UserLoginRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Admin;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -23,7 +26,7 @@ class LoginController extends Controller
         $action = new LoginAction($validatedData);
         $response = $action->handle_action();
 
-        $status = $response instanceof User ? 200 : 400;
+        $status = $response instanceof User || $response instanceof Admin ? 200 : 400;
 
         if($response instanceof Exception){
             return response()->json([
@@ -46,13 +49,29 @@ class LoginController extends Controller
     public function logout(Request $request) : JsonResponse
     {
         $user = $request->user();
-        
+       
         //hapus token saat ini
+        /* $tokenId = Str::before($request->bearerToken(), '|');
+        $user->tokens()->where('id' , $tokenId)->delete(); */
         $user->currentAccessToken()->delete();
 
         return response()->json([
             'status' => true,
             'data' => 'Logout berhasil'
         ] , 200);
+    }
+
+
+     /**
+    * Handle login request
+    */
+    public function test_data(Request $request)
+    {
+        return $request->user();
+        /* if( auth()->user() instanceof User){
+            return 'User';
+        }elseif( auth()->user() instanceof Admin){
+            return 'Admin';
+        } */
     }
 }

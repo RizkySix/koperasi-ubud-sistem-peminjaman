@@ -5,6 +5,7 @@ namespace App\Http\Requests\Authentication;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -25,10 +26,17 @@ class RegisterRequest extends FormRequest
     {
         return [
             'full_name' => 'required|string|min:3',
-            'phone_number' => 'required|string|min:11|max:14|unique:users',
             'password' => 'required|confirmed|string|min:6',
             'address' => 'required|string|min:6',
-            'birth_date' => 'required|date'
+            'birth_date' => 'required|date',
+            'phone_number' => [
+                'required',
+                'string',
+                'min:11',
+                'max:14',
+                Rule::unique('users', 'phone_number'),
+                Rule::unique('admins', 'phone_number'),
+            ],
         ];
     }
 

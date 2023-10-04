@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Authentication;
 
+use App\Models\Admin;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,12 +12,13 @@ use Tests\TestCase;
 class LoginTest extends TestCase
 {
     use RefreshDatabase;
-    private $user , $token;
+    private $user , $admin , $token;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        $this->admin = Admin::factory()->create();
     }
 
 
@@ -27,11 +29,20 @@ class LoginTest extends TestCase
     {
         $this->assertDatabaseEmpty('personal_access_tokens');
 
+        //case login nasabah
         $response = $this->actingAs($this->user)->postJson(RouteServiceProvider::DOMAIN . '/login' , [
             'phone_number' => $this->user->phone_number,
             'password' => 'password'
         ]);
         $response->assertStatus(200);
+
+        //case login admin
+        $response = $this->actingAs($this->admin)->postJson(RouteServiceProvider::DOMAIN . '/login' , [
+            'phone_number' => $this->admin->phone_number,
+            'password' => 'password'
+        ]);
+        $response->assertStatus(200);
+
         $response->assertJsonStructure([
             'status',
             'data' => [
@@ -40,12 +51,13 @@ class LoginTest extends TestCase
                 'verified_status',
                 'address' ,
                 'birth_date',
-                'token'
+                'token',
+                'role'
             ]
             ]);
 
-        //pastikan dibuat
-        $this->assertDatabaseCount('personal_access_tokens' , 1);
+        //pastikan dibuat token untuk nasabah dan admin
+        $this->assertDatabaseCount('personal_access_tokens' , 2);
         
     }
 
@@ -57,8 +69,16 @@ class LoginTest extends TestCase
     {
         $this->assertDatabaseEmpty('personal_access_tokens');
 
+        //case nasabah
         $response = $this->actingAs($this->user)->postJson(RouteServiceProvider::DOMAIN . '/login' , [
             'phone_number' => $this->user->phone_number,
+            'password' => 'password-salah'
+        ]);
+        $response->assertStatus(400);
+
+        //case admin
+        $response = $this->actingAs($this->admin)->postJson(RouteServiceProvider::DOMAIN . '/login' , [
+            'phone_number' => $this->admin->phone_number,
             'password' => 'password-salah'
         ]);
         $response->assertStatus(400);
@@ -108,14 +128,16 @@ class LoginTest extends TestCase
      /**
      * @group authentication-test
      */
-   /*  public function test_logout_should_only_destroy_current_authentication_token() : void
+    /* public function test_logout_should_only_destroy_current_authentication_token() : void
     {
         $this->test_multi_login_should_not_destroy_old_tokens();
        
         //pastikan total token saat ini 2
         $this->assertDatabaseCount('personal_access_tokens' , 2);
         
-        $response = $this->actingAs($this->user)->postJson(RouteServiceProvider::DOMAIN . '/logout');
+        $response = $this->postJson(RouteServiceProvider::DOMAIN . '/logout' , [] , [
+            'Authorization' => 'Bearer ' . $this->token
+        ]);
         $response->assertStatus(200);
         
 

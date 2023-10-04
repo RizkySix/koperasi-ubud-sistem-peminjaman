@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
+            $table->string('phone_number');
             $table->integer('otp_code' , false, true);
             $table->dateTime('expired_time');
         });
